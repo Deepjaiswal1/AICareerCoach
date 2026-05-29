@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+
 // ✅ RELATIVE IMPORTS: Ensures files are found correctly
 import { parsePdf } from '../../../lib/pdf-loader';
 import { analyzeResume } from '../../../lib/ai-service';
