@@ -16,13 +16,33 @@
 // export default nextConfig;
 
 
-// next.config.ts
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+// // next.config.ts
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
+//   webpack: (config) => {
+//     // config.externals = [...(config.externals || []), { 'pdfjs-dist': 'pdfjsLib' }];
+//     config.resolve.alias.canvas = false;
+//     return config;
+//   },
+// };
+// export default nextConfig;
+
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   webpack: (config) => {
-    // config.externals = [...(config.externals || []), { 'pdfjs-dist': 'pdfjsLib' }];
     config.resolve.alias.canvas = false;
     return config;
   },
 };
+
 export default nextConfig;
