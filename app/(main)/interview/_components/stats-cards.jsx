@@ -11,10 +11,18 @@ export default function StatsCards({ assessments }) {
     return (total / assessments.length).toFixed(1);
   };
 
+  // const getLatestAssessment = () => {
+  //   if (!assessments?.length) return null;
+  //   return assessments[0];
+  // };
+
   const getLatestAssessment = () => {
-    if (!assessments?.length) return null;
-    return assessments[0];
-  };
+  if (!assessments?.length) return null;
+  // Sort by date (newest first) and then take index 0
+  return [...assessments].sort((a, b) => 
+    new Date(b.createdAt) - new Date(a.createdAt)
+  )[0];
+};
 
   const getTotalQuestions = () => {
     if (!assessments?.length) return 0;

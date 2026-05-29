@@ -14,12 +14,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   id            String    @id @default(uuid())
   clerkUserId   String    @unique // clerk user id
   email         String    @unique
   name          String?
   imageUrl      String?
+  mockInterviews   MockInterview[]
   industry      String?    // Combined industry-subindustry (e.g., "tech-software-development")
   industryInsight IndustryInsight? @relation(fields: [industry], references: [industry])
   createdAt     DateTime  @default(now())
@@ -32,8 +34,40 @@ model User {
   // Relations
   skills        String[]  // Array of skills
   assessments   Assessment[]
-  resume        Resume?
+  resumes        Resume[]
   coverLetter   CoverLetter[]
+  roadmaps        Roadmap[]
+  resumeAnalysis ResumeAnalysis[]
+  // mockInterviews MockInterview[]
+}
+
+model MockInterview {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  // Metadata
+  jobPosition     String
+  jobDescription  String?
+  duration        String?
+  type            String[]
+  
+  // Participant Info (Collected from the Join Screen)
+  candidateName   String?  // NEW: Store the name entered on MockPage
+  candidateEmail  String?  // NEW: Store the email entered on MockPage
+  
+  // Content
+  questions       Json[]   // [{question, type}]
+  
+  // Results from Retell AI
+  status          String   @default("pending") // "pending", "completed", "failed"
+  callId          String?  @unique             // NEW: Store Retell's call_id to fetch feedback
+  feedback        Json?    // NEW: Stores AI feedback {summary: string, score: number, transcript: array}
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Assessment {
@@ -52,9 +86,11 @@ model Assessment {
 
 model Resume {
   id          String    @id @default(cuid())
-  userId      String    @unique    // One resume per user
-  user        User      @relation(fields: [userId], references: [id])
-  content     String    @db.Text // Markdown content
+  userId      String        // One resume per user
+  user        User      @relation(fields: [userId], references: [clerkUserId])
+  name        String?
+  // content     String    @db.Text // Markdown content
+  content   Json
   atsScore    Float?
   feedback    String?
   createdAt   DateTime  @default(now())
@@ -74,6 +110,66 @@ model CoverLetter {
   updatedAt       DateTime  @updatedAt
 
   @@index([userId])
+}
+
+model ResumeAnalysis {
+  id              String   @id @default(uuid())
+  userId          String   // This will map to clerkUserId
+  user            User     @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+  
+  jobTitle        String?
+  matchPercentage Int
+  summary         String   @db.Text
+  missingKeywords Json
+  suggestions     Json
+  formattingIssues Json
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Roadmap {
+  id          String         @id @default(uuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  jobTitle    String         // The position searched (e.g., "DevOps Engineer")
+  description String?        @db.Text
+  duration     String?
+
+  nodes        Json     // Stores the initialNodes array
+  edges        Json
+  
+  // Array of Phase objects
+  phases      RoadmapPhase[]
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+model RoadmapPhase {
+  id           String   @id @default(uuid())
+  roadmapId    String
+  roadmap      Roadmap  @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  
+  order        Int      // To maintain Step 1, Step 2, Step 3 sequence
+  title        String
+  description  String   @db.Text
+  
+  // Specific AI-generated content
+  competencies String[] // Skills to learn in this phase
+  
+  // Resource Links
+  videoLabel   String?
+  videoUrl     String?
+  docLabel     String?
+  docUrl       String?
+
+  @@index([roadmapId])
 }
 
 // Combined Industry Trends and Salary Insights

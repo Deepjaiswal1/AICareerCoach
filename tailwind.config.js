@@ -8,4 +8,11 @@ module.exports = {
   ],
   theme: { extend: {} },
   plugins: [],
+  success: {
+          100: "#dcfce7",
+          200: "#bbf7d0",
+          300: "#86efac",
+          500: "#22c55e",
+          700: "#15803d",
+  },
 };
